@@ -1,0 +1,15 @@
+{% block content %}
+
+<div>
+    <h1>{{chat.name}}</h1>
+    <p>The Number of The Connected Users : {{chat.participants.count}}</p>
+
+    <ul>
+        {% for message in messages %}
+        <li>{{message.text}}</li>
+        {% endfor %}
+    </ul>
+</div>
+
+
+{% endblock content %}

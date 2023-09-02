@@ -1,0 +1,10 @@
+{% block content %}
+
+<h1>Available Chat Rooms</h1>
+{% for chat in chat_rooms %}
+<div>
+    <h2>{{chat.name}}</h2>
+    <p>The Number of The Connected Users : {{chat.participants.count}}</p>
+</div>
+{% endfor %}
+{% endblock content %}
