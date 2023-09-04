@@ -4,14 +4,41 @@
     <h1>{{chat.name}}</h1>
     <p>The Number of The Connected Users : {{chat.participants.count}}</p>
 
-    <ul>
+    <ul id="chat-log">
         {% for message in messages %}
-        <li>{{message.text}}</li>
+            <li><strong>{{message.sender}}:</strong> {{message.text}}</li>
         {% endfor %}
     </ul>
 
     {% include "send_message.html" %}
 </div>
-
-
 {% endblock content %}
+
+<script>
+    const FetchNewMessages  = () => {
+        
+        fetch("{% url 'chat_room-detail' chat.pk %}", {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.json())
+        .then(data =>{
+            const chatLog = document.getElementById("chat-log");
+            chatLog.innerHTML = ''
+            data.messages.forEach( message =>{
+                const messageElement = document.createElement("li")
+                messageElement.className = "message";
+                messageElement.innerHTML = `<strong>${message.sender}:</strong> ${message.text}`;
+                chatLog.appendChild(messageElement);
+            })
+        })
+        .catch(error =>{
+            console.error("Error:", error);
+        })
+
+
+
+
+    }
+    const updateInterval = 1000; // 5 seconds in milliseconds
+    setInterval(FetchNewMessages, updateInterval);
+</script>

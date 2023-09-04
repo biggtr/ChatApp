@@ -1,7 +1,7 @@
 from django.shortcuts import redirect, render, get_object_or_404, get_list_or_404
 from django.urls import reverse
 from .models import ChatRoom, Message
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from .forms import MessageForm
 
 # Create your views here.
@@ -21,6 +21,17 @@ def ChatRoomDetail(request, chat_id):
     form = MessageForm()
     if request.method == "POST":
         return SendMessageView(request, chat, form)
+    if request.META.get("HTTP_X_REQUESTED_WITH") == "XMLHttpRequest":
+        # Serialize messages into JSON format
+        message_data = [
+            {
+                "text": message.text,
+                "sender": message.sender.username,
+                "timestamp": message.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
+            }
+            for message in messages
+        ]
+        return JsonResponse({"messages": message_data})
 
     return render(
         request,
@@ -37,7 +48,10 @@ def SendMessageView(request, chat, form):
             user.chat_room = chat
             user.sender = request.user
             user.save()
-            return redirect("chat_room-detail", chat_id=chat.pk)
+            return JsonResponse({"success": True})
+        else:
+            errors = form.errors.as_json()
+            return JsonResponse({"success": False, "errors": errors}, status=400)
     else:
         form = MessageForm()
     return render(request, "chat_room_detail.html", context={"form": form})

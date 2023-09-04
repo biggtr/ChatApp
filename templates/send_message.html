@@ -1,5 +1,36 @@
-<form action="" method = "post">
+<form action="" method = "post" id= "message-form">
     {% csrf_token %}
     {{form.as_p}}
     <button type= "submit">Send</button>
 </form>
+<div id="form-response"></div>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const form = document.getElementById("message-form");
+        const formResponse = document.getElementById("form-response");
+
+        form.addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            fetch("{% url 'chat_room-detail' chat.pk %}", {
+                method: "POST",
+                body: new FormData(form),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Form submitted successfully
+                    // You can perform actions like clearing the form
+                    form.reset();
+                } 
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                // Handle other errors if needed
+            });
+        });
+    });
+</script>
+
