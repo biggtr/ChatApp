@@ -54,12 +54,28 @@ def SendMessageView(request, chat, form):
             return JsonResponse({"success": False, "errors": errors}, status=400)
     else:
         form = MessageForm()
-    return render(request, "chat_room_detail.html", context={"form": form})
+    return render(
+        request, "chat_room_detail.html", context={"form": form, "chat": chat}
+    )
 
 
-def EditMessageView(request, chat_id):
-    pass
+def EditMessageView(request, chat_id, message_id):
+    chat = get_object_or_404(ChatRoom, pk=chat_id)
+    message = get_object_or_404(Message, pk=message_id, chat_room=chat)
+    if request.method == "POST":
+        form = MessageForm(request.POST, instance=message)
+        if form.is_valid():
+            form.save()
+
+    else:
+        form = MessageForm(instance=message)
+    return render(request, "edit_message.html", context={"form": form})
 
 
-def DeleteMessageView(request, chat_id):
-    pass
+def DeleteMessageView(request, chat_id, message_id):
+    chat = get_object_or_404(ChatRoom, pk=chat_id)
+    message = get_object_or_404(Message, pk=message_id, chat_room=chat)
+    if request.method == "POST":
+        message.delete()
+
+    return render(request, "delete_message.html", context={"message": message})
